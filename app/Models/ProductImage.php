@@ -24,9 +24,13 @@ class ProductImage extends Model
 
     protected function url(): Attribute
     {
-        return Attribute::get(fn () => $this->isUploaded()
-            ? Storage::disk('public')->url($this->path)
-            : $this->path);
+        return Attribute::get(function () {
+            if (! $this->isUploaded()) {
+                return $this->path;
+            }
+
+            return '/storage/'.ltrim(str_replace('\\', '/', $this->path), '/');
+        });
     }
 
     protected static function booted(): void

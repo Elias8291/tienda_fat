@@ -82,6 +82,28 @@ class AdminCatalogTest extends TestCase
         $this->assertSame('Set rosa', $product->name);
         $this->assertCount(2, $product->images);
         Storage::disk('public')->assertExists($product->images[0]->path);
+        $this->assertMatchesRegularExpression('#^/storage/products/.+\.(jpe?g|png)$#', $product->images[0]->url);
+
+        $this->get('/')->assertInertia(fn (Assert $page) => $page
+            ->where('products.0.images.0.url', $product->images[0]->url));
+    }
+
+    public function test_an_uploaded_photo_can_be_opened_from_the_catalog(): void
+    {
+        $directory = storage_path('app/public/products');
+        if (! is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+
+        $name = 'catalog-test-'.uniqid().'.jpg';
+        file_put_contents($directory.DIRECTORY_SEPARATOR.$name, 'foto');
+
+        try {
+            $this->get('/storage/products/'.$name)->assertOk();
+            $this->get('/storage/'.rawurlencode('../.env'))->assertNotFound();
+        } finally {
+            @unlink($directory.DIRECTORY_SEPARATOR.$name);
+        }
     }
 
     public function test_a_new_product_needs_a_photo_and_a_valid_old_price(): void
