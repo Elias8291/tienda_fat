@@ -1,0 +1,1 @@
+var e=e=>`$`+Number(e).toFixed(2),t=e=>{let t=Number(e.price),n=Number(e.old_price);return!n||n<=t?0:Math.round((1-t/n)*100)};export{e as n,t};
