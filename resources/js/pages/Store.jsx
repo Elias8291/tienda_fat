@@ -1,6 +1,6 @@
 import '../../css/store.css';
 import { Head } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bag, Close, Dress, Hanger, Heart, Shirt, Sparkle, Trash, WhatsApp } from '../components/Icons';
 import { discount, money } from '../lib/money';
 
@@ -17,6 +17,59 @@ const photo = (id, w = 1000) => `https://images.unsplash.com/photo-${id}?auto=fo
 
 const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 const cover = (product) => product.images[0]?.url;
+
+function contactLabel(number) {
+    const digits = String(number).replace(/\D/g, '');
+    const local = digits.startsWith('52') && digits.length === 12 ? digits.slice(2) : digits;
+    return local.length === 10 ? `${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}` : local;
+}
+
+function CardPhoto({ product, onOpen }) {
+    const images = product.images;
+    const [index, setIndex] = useState(0);
+    const startX = useRef(0);
+    const swiped = useRef(false);
+    const off = discount(product);
+    const step = (dir) => setIndex((n) => (n + dir + images.length) % images.length);
+
+    return (
+        <div
+            className="pic"
+            onTouchStart={(e) => {
+                startX.current = e.changedTouches[0].clientX;
+                swiped.current = false;
+            }}
+            onTouchEnd={(e) => {
+                if (images.length < 2) return;
+                const dx = e.changedTouches[0].clientX - startX.current;
+                if (Math.abs(dx) < 36) return;
+                swiped.current = true;
+                step(dx < 0 ? 1 : -1);
+            }}
+        >
+            <button
+                type="button"
+                className="pic-hit"
+                onClick={() => {
+                    if (swiped.current) {
+                        swiped.current = false;
+                        return;
+                    }
+                    onOpen();
+                }}
+                aria-label={`Ver ${product.name}`}
+            >
+                {images[index] && <img src={images[index].url} alt={product.name} loading="lazy" />}
+            </button>
+            {off > 0 && <span className="tag">−{off}%</span>}
+            {images.length > 1 && (
+                <button type="button" className="next" onClick={() => step(1)} aria-label="Foto siguiente">
+                    Siguiente
+                </button>
+            )}
+        </div>
+    );
+}
 
 function Price({ product }) {
     const off = discount(product);
@@ -43,6 +96,7 @@ export default function Store({ products, whatsapp }) {
     const [phone, setPhone] = useState('');
     const [error, setError] = useState('');
     const [confirming, setConfirming] = useState(false);
+    const shotX = useRef(0);
 
     const items = useMemo(() => cart.map((id) => products.find((p) => p.id === id)).filter(Boolean), [cart, products]);
     const total = items.reduce((sum, p) => sum + p.price, 0);
@@ -170,22 +224,16 @@ export default function Store({ products, whatsapp }) {
                     </div>
                     <div className="grid">
                         {products.length === 0 && <p className="none">Pronto tendremos nuevas piezas.</p>}
-                        {products.map((p) => {
-                            const off = discount(p);
-                            return (
+                        {products.map((p) => (
                             <article className="card" key={p.id}>
-                                <button className="pic" onClick={() => openProduct(p)} aria-label={`Ver ${p.name}`}>
-                                    {cover(p) && <img src={cover(p)} alt={p.name} loading="lazy" />}
-                                    {off > 0 && <span className="tag">−{off}%</span>}
-                                </button>
+                                <CardPhoto product={p} onOpen={() => openProduct(p)} />
                                 <h3 onClick={() => openProduct(p)}>{p.name}</h3>
                                 <Price product={p} />
                                 <button className={`add ${inCart(p.id) ? 'in' : ''}`} onClick={() => toggleItem(p.id)}>
                                     {inCart(p.id) ? 'En el pedido' : 'Añadir al pedido'}
                                 </button>
                             </article>
-                            );
-                        })}
+                        ))}
                     </div>
                 </section>
 
@@ -207,6 +255,11 @@ export default function Store({ products, whatsapp }) {
 
                 <footer className="s-footer" id="contacto">
                     <span className="logo">Fati Nails</span>
+                    {whatsapp && (
+                        <a className="contact" href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer">
+                            <WhatsApp /> {contactLabel(whatsapp)}
+                        </a>
+                    )}
                     Pedidos por WhatsApp · © {new Date().getFullYear()} Fati Nails
                 </footer>
             </div>
@@ -250,9 +303,28 @@ export default function Store({ products, whatsapp }) {
                 <div className="modal" onClick={(e) => e.target === e.currentTarget && setViewing(null)}>
                     <div className="mbox">
                         <button className="x" onClick={() => setViewing(null)} aria-label="Cerrar"><Close /></button>
-                        <div className="mpics">
+                        <div
+                            className="mpics"
+                            onTouchStart={(e) => { shotX.current = e.changedTouches[0].clientX; }}
+                            onTouchEnd={(e) => {
+                                if (viewing.images.length < 2) return;
+                                const dx = e.changedTouches[0].clientX - shotX.current;
+                                if (Math.abs(dx) < 36) return;
+                                setShot((n) => (n + (dx < 0 ? 1 : -1) + viewing.images.length) % viewing.images.length);
+                            }}
+                        >
                             {viewing.images[shot] && <img src={viewing.images[shot].url} alt={viewing.name} />}
                             {discount(viewing) > 0 && <span className="tag">−{discount(viewing)}%</span>}
+                            {viewing.images.length > 1 && (
+                                <button
+                                    type="button"
+                                    className="next"
+                                    onClick={() => setShot((n) => (n + 1) % viewing.images.length)}
+                                    aria-label="Foto siguiente"
+                                >
+                                    Siguiente
+                                </button>
+                            )}
                             {viewing.images.length > 1 && (
                                 <div className="thumbs">
                                     {viewing.images.map((img, i) => (

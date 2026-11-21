@@ -29,7 +29,7 @@ return [
     ],
 
     'whatsapp' => [
-        'number' => env('WHATSAPP_NUMBER', ''),
+        'number' => env('WHATSAPP_NUMBER', '529511879940'),
     ],
 
     'slack' => [
