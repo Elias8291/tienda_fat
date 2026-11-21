@@ -42,6 +42,10 @@ export const ChevronDown = () => (
     <svg viewBox="0 0 24 24"><path d="m6 10 6 6 6-6" /></svg>
 );
 
+export const ChevronRight = () => (
+    <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
+);
+
 export const Plus = () => (
     <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
 );

@@ -1,10 +1,11 @@
 import '../../css/store.css';
 import { Head } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Bag, Close, Dress, Hanger, Heart, Shirt, Sparkle, Trash, WhatsApp } from '../components/Icons';
+import { Bag, ChevronRight, Close, Dress, Hanger, Heart, Shirt, Sparkle, Trash, WhatsApp } from '../components/Icons';
 import { discount, money } from '../lib/money';
 
 const CART_KEY = 'fati-cart';
+const WHATSAPP = '529511879940';
 const HEARTS = [[8, 12], [78, 9], [16, 70], [86, 62], [60, 84], [28, 30], [70, 36]];
 const BRAND = 'Fati Nails';
 const WEAR = [
@@ -62,11 +63,6 @@ function CardPhoto({ product, onOpen }) {
                 {images[index] && <img src={images[index].url} alt={product.name} loading="lazy" />}
             </button>
             {off > 0 && <span className="tag">−{off}%</span>}
-            {images.length > 1 && (
-                <button type="button" className="next" onClick={() => step(1)} aria-label="Foto siguiente">
-                    Siguiente
-                </button>
-            )}
         </div>
     );
 }
@@ -97,6 +93,9 @@ export default function Store({ products, whatsapp }) {
     const [error, setError] = useState('');
     const [confirming, setConfirming] = useState(false);
     const shotX = useRef(0);
+    const drawerRef = useRef(null);
+    const scrollLock = useRef(null);
+    const line = String(whatsapp || '').replace(/\D/g, '') || WHATSAPP;
 
     const items = useMemo(() => cart.map((id) => products.find((p) => p.id === id)).filter(Boolean), [cart, products]);
     const total = items.reduce((sum, p) => sum + p.price, 0);
@@ -107,8 +106,43 @@ export default function Store({ products, whatsapp }) {
     }, [items]);
 
     useEffect(() => {
-        document.body.style.overflow = cartOpen || viewing || confirming ? 'hidden' : '';
+        const open = cartOpen || viewing || confirming;
+        if (open) {
+            if (scrollLock.current === null) scrollLock.current = window.scrollY;
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.top = `-${scrollLock.current}px`;
+            return;
+        }
+        const y = scrollLock.current ?? 0;
+        scrollLock.current = null;
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+        window.scrollTo(0, y);
     }, [cartOpen, viewing, confirming]);
+
+    useEffect(() => {
+        if (!cartOpen) return undefined;
+        const drawer = drawerRef.current;
+        const viewport = window.visualViewport;
+        if (!drawer || !viewport) return undefined;
+        const fit = () => {
+            drawer.style.height = `${viewport.height}px`;
+            drawer.style.top = `${viewport.offsetTop}px`;
+        };
+        fit();
+        viewport.addEventListener('resize', fit);
+        viewport.addEventListener('scroll', fit);
+        return () => {
+            viewport.removeEventListener('resize', fit);
+            viewport.removeEventListener('scroll', fit);
+            drawer.style.height = '';
+            drawer.style.top = '';
+        };
+    }, [cartOpen]);
 
     useEffect(() => {
         const onKey = (e) => {
@@ -146,10 +180,6 @@ export default function Store({ products, whatsapp }) {
             setError('Escribe tu número de teléfono (10 dígitos) para continuar.');
             return;
         }
-        if (!whatsapp) {
-            setError('La tienda aún no tiene un número de WhatsApp configurado.');
-            return;
-        }
         setError('');
         setConfirming(true);
     };
@@ -161,7 +191,7 @@ export default function Store({ products, whatsapp }) {
             `Hola, soy ${name.trim()}. Me gustaría pedir:\n\n${lines.join('\n')}\n\nTotal: ${money(total)}` +
             `\n\nMi teléfono: ${phone.trim()}` +
             '\n\n¿Me confirmas disponibilidad? ¡Gracias!';
-        window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+        window.open(`https://wa.me/${line}?text=${encodeURIComponent(msg)}`, '_blank');
     };
 
     return (
@@ -255,18 +285,16 @@ export default function Store({ products, whatsapp }) {
 
                 <footer className="s-footer" id="contacto">
                     <span className="logo">Fati Nails</span>
-                    {whatsapp && (
-                        <a className="contact" href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer">
-                            <WhatsApp /> {contactLabel(whatsapp)}
-                        </a>
-                    )}
+                    <a className="contact" href={`https://wa.me/${line}`} target="_blank" rel="noreferrer">
+                        <WhatsApp /> {contactLabel(line)}
+                    </a>
                     Pedidos por WhatsApp · © {new Date().getFullYear()} Fati Nails
                 </footer>
             </div>
 
             <div className={`veil ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} />
 
-            <aside className={`drawer ${cartOpen ? 'open' : ''}`} aria-label="Tu pedido">
+            <aside ref={drawerRef} className={`drawer ${cartOpen ? 'open' : ''}`} aria-label="Tu pedido">
                 <div className="dhead">
                     <h2>Tu pedido</h2>
                     <button className="x" onClick={() => setCartOpen(false)} aria-label="Cerrar"><Close /></button>
@@ -322,7 +350,7 @@ export default function Store({ products, whatsapp }) {
                                     onClick={() => setShot((n) => (n + 1) % viewing.images.length)}
                                     aria-label="Foto siguiente"
                                 >
-                                    Siguiente
+                                    <ChevronRight />
                                 </button>
                             )}
                             {viewing.images.length > 1 && (
