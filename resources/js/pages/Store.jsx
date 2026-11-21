@@ -25,13 +25,45 @@ function contactLabel(number) {
     return local.length === 10 ? `${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}` : local;
 }
 
-function CardPhoto({ product, onOpen }) {
+function Photo({ src, alt, eager = false }) {
+    const [shown, setShown] = useState('');
+    const ready = shown === src;
+
+    return (
+        <>
+            {!ready && <span className="bone" aria-hidden="true" />}
+            <img
+                src={src}
+                alt={alt}
+                className={ready ? 'on' : ''}
+                loading={eager ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchPriority={eager ? 'high' : 'low'}
+                onLoad={(e) => {
+                    if (e.currentTarget.naturalWidth > 0) setShown(src);
+                }}
+                ref={(node) => {
+                    if (node?.complete && node.naturalWidth > 0) setShown(src);
+                }}
+            />
+        </>
+    );
+}
+
+function CardPhoto({ product, onOpen, eager = false }) {
     const images = product.images;
     const [index, setIndex] = useState(0);
     const startX = useRef(0);
     const swiped = useRef(false);
     const off = discount(product);
     const step = (dir) => setIndex((n) => (n + dir + images.length) % images.length);
+
+    useEffect(() => {
+        images.forEach((image) => {
+            const preload = new Image();
+            preload.src = image.url;
+        });
+    }, [images]);
 
     return (
         <div
@@ -60,7 +92,7 @@ function CardPhoto({ product, onOpen }) {
                 }}
                 aria-label={`Ver ${product.name}`}
             >
-                {images[index] && <img src={images[index].url} alt={product.name} loading="lazy" />}
+                {images[index] && <Photo src={images[index].url} alt={product.name} eager={eager && index === 0} />}
             </button>
             {off > 0 && <span className="tag">−{off}%</span>}
         </div>
@@ -254,9 +286,9 @@ export default function Store({ products, whatsapp }) {
                     </div>
                     <div className="grid">
                         {products.length === 0 && <p className="none">Pronto tendremos nuevas piezas.</p>}
-                        {products.map((p) => (
+                        {products.map((p, i) => (
                             <article className="card" key={p.id}>
-                                <CardPhoto product={p} onOpen={() => openProduct(p)} />
+                                <CardPhoto product={p} eager={i < 4} onOpen={() => openProduct(p)} />
                                 <h3 onClick={() => openProduct(p)}>{p.name}</h3>
                                 <Price product={p} />
                                 <button className={`add ${inCart(p.id) ? 'in' : ''}`} onClick={() => toggleItem(p.id)}>
@@ -341,7 +373,7 @@ export default function Store({ products, whatsapp }) {
                                 setShot((n) => (n + (dx < 0 ? 1 : -1) + viewing.images.length) % viewing.images.length);
                             }}
                         >
-                            {viewing.images[shot] && <img src={viewing.images[shot].url} alt={viewing.name} />}
+                            {viewing.images[shot] && <Photo src={viewing.images[shot].url} alt={viewing.name} eager />}
                             {discount(viewing) > 0 && <span className="tag">−{discount(viewing)}%</span>}
                             {viewing.images.length > 1 && (
                                 <button

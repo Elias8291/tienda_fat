@@ -1,17 +1,17 @@
 {
-  "_AdminLayout-BmF2Ie7I.js": {
-    "file": "assets/AdminLayout-BmF2Ie7I.js",
+  "_AdminLayout-B1hAZ4S5.js": {
+    "file": "assets/AdminLayout-B1hAZ4S5.js",
     "name": "AdminLayout",
     "imports": [
       "resources/js/app.jsx",
-      "_Icons-DGs57GUT.js"
+      "_Icons-9YJtmoDQ.js"
     ],
     "css": [
       "assets/admin-CLE9GEiQ.css"
     ]
   },
-  "_Icons-DGs57GUT.js": {
-    "file": "assets/Icons-DGs57GUT.js",
+  "_Icons-9YJtmoDQ.js": {
+    "file": "assets/Icons-9YJtmoDQ.js",
     "name": "Icons",
     "imports": [
       "resources/js/app.jsx"
@@ -26,7 +26,7 @@
     "name": "money"
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-DJXyNKzU.js",
+    "file": "assets/app-184ml1n4.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -41,54 +41,54 @@
     ]
   },
   "resources/js/pages/Admin/Login.jsx": {
-    "file": "assets/Login-DZKIXJor.js",
+    "file": "assets/Login-pMulBpZo.js",
     "name": "Login",
     "src": "resources/js/pages/Admin/Login.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Icons-DGs57GUT.js"
+      "_Icons-9YJtmoDQ.js"
     ],
     "css": [
       "assets/admin-CLE9GEiQ.css"
     ]
   },
   "resources/js/pages/Admin/Products/Form.jsx": {
-    "file": "assets/Form-cbecMI3G.js",
+    "file": "assets/Form-BNxIccpO.js",
     "name": "Form",
     "src": "resources/js/pages/Admin/Products/Form.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-BmF2Ie7I.js",
-      "_Icons-DGs57GUT.js",
+      "_AdminLayout-B1hAZ4S5.js",
+      "_Icons-9YJtmoDQ.js",
       "_money-Dyt2RYoW.js"
     ]
   },
   "resources/js/pages/Admin/Products/Index.jsx": {
-    "file": "assets/Index-7m8lwprz.js",
+    "file": "assets/Index-3Sk9_kpw.js",
     "name": "Index",
     "src": "resources/js/pages/Admin/Products/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-BmF2Ie7I.js",
-      "_Icons-DGs57GUT.js",
+      "_AdminLayout-B1hAZ4S5.js",
+      "_Icons-9YJtmoDQ.js",
       "_money-Dyt2RYoW.js"
     ]
   },
   "resources/js/pages/Store.jsx": {
-    "file": "assets/Store-B91FPLRt.js",
+    "file": "assets/Store-BFcRo48J.js",
     "name": "Store",
     "src": "resources/js/pages/Store.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Icons-DGs57GUT.js",
+      "_Icons-9YJtmoDQ.js",
       "_money-Dyt2RYoW.js"
     ],
     "css": [
-      "assets/Store-C32JQXrX.css"
+      "assets/Store-DWIkcSfZ.css"
     ]
   }
 }
