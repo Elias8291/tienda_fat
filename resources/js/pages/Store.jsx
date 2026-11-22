@@ -14,7 +14,19 @@ const WEAR = [
     { Icon: Shirt, x: 80, y: 72, delay: 0.65 },
     { Icon: Bag, x: 9, y: 52, delay: 0.85 },
 ];
-const photo = (id, w = 1000) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&q=80&w=${w}`;
+const photo = (id, w = 800) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&q=70&w=${w}`;
+
+function sized(url, width) {
+    if (!url || !url.includes('images.unsplash.com')) return url;
+
+    const parsed = new URL(url);
+    parsed.searchParams.set('auto', 'format');
+    parsed.searchParams.set('fit', 'crop');
+    parsed.searchParams.set('q', '70');
+    parsed.searchParams.set('w', String(width));
+
+    return parsed.toString();
+}
 
 const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 const cover = (product) => product.images[0]?.url;
@@ -25,7 +37,7 @@ function contactLabel(number) {
     return local.length === 10 ? `${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}` : local;
 }
 
-function Photo({ src, alt, eager = false, x = 50, y = 50 }) {
+function Photo({ src, srcSet, sizes, alt, eager = false, x = 50, y = 50 }) {
     const [shown, setShown] = useState('');
     const ready = shown === src;
 
@@ -34,6 +46,8 @@ function Photo({ src, alt, eager = false, x = 50, y = 50 }) {
             {!ready && <span className="bone" aria-hidden="true" />}
             <img
                 src={src}
+                srcSet={srcSet}
+                sizes={sizes}
                 alt={alt}
                 className={ready ? 'on' : ''}
                 style={{ objectPosition: `${x}% ${y}%` }}
@@ -51,6 +65,18 @@ function Photo({ src, alt, eager = false, x = 50, y = 50 }) {
     );
 }
 
+function cardSources(url) {
+    if (!url?.includes('images.unsplash.com')) {
+        return { src: url };
+    }
+
+    return {
+        src: sized(url, 640),
+        srcSet: `${sized(url, 400)} 400w, ${sized(url, 720)} 720w`,
+        sizes: '(max-width: 820px) 46vw, 260px',
+    };
+}
+
 function CardPhoto({ product, onOpen, eager = false }) {
     const images = product.images;
     const [index, setIndex] = useState(0);
@@ -58,13 +84,6 @@ function CardPhoto({ product, onOpen, eager = false }) {
     const swiped = useRef(false);
     const off = discount(product);
     const step = (dir) => setIndex((n) => (n + dir + images.length) % images.length);
-
-    useEffect(() => {
-        images.forEach((image) => {
-            const preload = new Image();
-            preload.src = image.url;
-        });
-    }, [images]);
 
     return (
         <div
@@ -95,7 +114,7 @@ function CardPhoto({ product, onOpen, eager = false }) {
             >
                 {images[index] && (
                     <Photo
-                        src={images[index].url}
+                        {...cardSources(images[index].url)}
                         alt={product.name}
                         eager={eager && index === 0}
                         x={images[index].focus_x}
@@ -237,7 +256,10 @@ export default function Store({ products, whatsapp }) {
 
     return (
         <>
-            <Head title="Tienda" />
+            <Head title="Tienda">
+            <link rel="preconnect" href="https://images.unsplash.com" />
+            <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        </Head>
             <div className="page">
                 <header className="s-header">
                     <div className="bar">
@@ -310,8 +332,8 @@ export default function Store({ products, whatsapp }) {
 
                 <section className="about" id="marca">
                     <div className="stack" aria-hidden="true">
-                        <img src={photo('1434389677669-e08b4cac3105', 500)} alt="" />
-                        <img src={photo('1594633312681-425c7b97ccd1', 500)} alt="" />
+                        <img src={photo('1434389677669-e08b4cac3105', 480)} alt="" loading="lazy" decoding="async" />
+                        <img src={photo('1594633312681-425c7b97ccd1', 480)} alt="" loading="lazy" decoding="async" />
                     </div>
                     <div className="text">
                         <h2 className="title">Sobre la marca</h2>
@@ -319,7 +341,7 @@ export default function Store({ products, whatsapp }) {
                         <button className="s-btn" onClick={() => go('catalogo')}>Catálogo</button>
                     </div>
                     <div className="frame">
-                        <img src={photo('1534528741775-53994a69daeb', 600)} alt="Fati Nails" />
+                        <img src={photo('1534528741775-53994a69daeb', 560)} alt="Fati Nails" loading="lazy" decoding="async" />
                         <span className="sp" aria-hidden="true"><Heart /></span>
                     </div>
                 </section>
@@ -337,9 +359,14 @@ export default function Store({ products, whatsapp }) {
 
             <aside ref={drawerRef} className={`drawer ${cartOpen ? 'open' : ''}`} aria-label="Tu pedido">
                 <div className="dhead">
-                    <h2>Tu pedido</h2>
-                    <button type="button" className="more" onClick={() => setCartOpen(false)}>
-                        Agregar más productos
+                    <div className="dtitle">
+                        <h2>Tu pedido</h2>
+                        <button type="button" className="more" onClick={() => setCartOpen(false)}>
+                            Agregar más productos
+                        </button>
+                    </div>
+                    <button type="button" className="x" onClick={() => setCartOpen(false)} aria-label="Ocultar pedido">
+                        <Close />
                     </button>
                 </div>
                 <div className="items">
@@ -348,7 +375,7 @@ export default function Store({ products, whatsapp }) {
                     ) : (
                         items.map((p) => (
                             <div className="line" key={p.id}>
-                                <img src={cover(p)} alt={p.name} />
+                                <img src={sized(cover(p), 240)} alt={p.name} />
                                 <div>
                                     <h4>{p.name}</h4>
                                     <div className="pr">{money(p.price)}</div>
@@ -386,7 +413,7 @@ export default function Store({ products, whatsapp }) {
                         >
                             {viewing.images[shot] && (
                                 <Photo
-                                    src={viewing.images[shot].url}
+                                    src={sized(viewing.images[shot].url, 960)}
                                     alt={viewing.name}
                                     eager
                                     x={viewing.images[shot].focus_x}

@@ -74,7 +74,10 @@ class AdminCatalogTest extends TestCase
                 'price' => '25',
                 'old_price' => '30',
                 'active' => '1',
-                'images' => [UploadedFile::fake()->image('a.jpg'), UploadedFile::fake()->image('b.png')],
+                'images' => [
+                    UploadedFile::fake()->image('a.jpg', 2000, 3000),
+                    UploadedFile::fake()->image('b.png', 1800, 1200),
+                ],
             ])
             ->assertRedirect('/admin/productos');
 
@@ -82,7 +85,9 @@ class AdminCatalogTest extends TestCase
         $this->assertSame('Set rosa', $product->name);
         $this->assertCount(2, $product->images);
         Storage::disk('public')->assertExists($product->images[0]->path);
-        $this->assertMatchesRegularExpression('#^/storage/products/.+\.(jpe?g|png)$#', $product->images[0]->url);
+        $this->assertMatchesRegularExpression('#^/storage/products/.+\.(webp|jpe?g|png)$#', $product->images[0]->url);
+        [$width, $height] = getimagesize(Storage::disk('public')->path($product->images[0]->path));
+        $this->assertLessThanOrEqual(960, max($width, $height));
 
         $this->get('/')->assertInertia(fn (Assert $page) => $page
             ->where('products.0.images.0.url', $product->images[0]->url));

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Models\Product;
+use App\Support\CatalogPhoto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -126,7 +127,7 @@ class ProductController extends Controller
 
         foreach ($request->file('images', []) as $index => $file) {
             $product->images()->create([
-                'path' => $file->store('products', 'public'),
+                'path' => CatalogPhoto::store($file),
                 'position' => ++$position,
                 'focus_x' => (int) $request->input("new_focus_x.$index", 50),
                 'focus_y' => (int) $request->input("new_focus_y.$index", 50),
