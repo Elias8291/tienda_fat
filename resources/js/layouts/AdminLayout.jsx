@@ -1,6 +1,6 @@
 import '../../css/admin.css';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Bag, Logout, Store } from '../components/Icons';
+import { Bag, Logout, Store, Users } from '../components/Icons';
 
 export default function AdminLayout({ title, subtitle, actions, children }) {
     const { auth, flash } = usePage().props;
@@ -17,6 +17,9 @@ export default function AdminLayout({ title, subtitle, actions, children }) {
                 <nav className="a-nav">
                     <Link href="/admin/productos" className={usePage().url.startsWith('/admin/productos') ? 'on' : ''}>
                         <Bag /> <span>Productos</span>
+                    </Link>
+                    <Link href="/admin/usuarios" className={usePage().url.startsWith('/admin/usuarios') ? 'on' : ''}>
+                        <Users /> <span>Usuarios</span>
                     </Link>
                     <a href="/" target="_blank" rel="noreferrer">
                         <Store /> <span>Ver tienda</span>

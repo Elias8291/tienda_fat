@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('auth')->group(function () {
         Route::post('logout', [AuthController::class, 'destroy'])->name('logout');
         Route::redirect('/', '/admin/productos');
+
+        Route::get('usuarios', [UserController::class, 'index'])->name('users.index');
+        Route::post('usuarios', [UserController::class, 'store'])->name('users.store');
+        Route::delete('usuarios/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         Route::patch('productos/{product}/visibilidad', [ProductController::class, 'toggle'])->name('products.toggle');
         Route::patch('productos/{product}/posicion', [ProductController::class, 'move'])->name('products.move');

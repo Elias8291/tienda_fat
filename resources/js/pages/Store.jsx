@@ -5,7 +5,7 @@ import { Bag, ChevronRight, Close, Dress, Hanger, Heart, Shirt, Sparkle, Trash, 
 import { discount, money } from '../lib/money';
 
 const CART_KEY = 'fati-cart';
-const WHATSAPP = '529511879940';
+const WHATSAPP = '529513565537';
 const HEARTS = [[8, 12], [78, 9], [16, 70], [86, 62], [60, 84], [28, 30], [70, 36]];
 const BRAND = 'Fati Nails';
 const WEAR = [
@@ -338,7 +338,9 @@ export default function Store({ products, whatsapp }) {
             <aside ref={drawerRef} className={`drawer ${cartOpen ? 'open' : ''}`} aria-label="Tu pedido">
                 <div className="dhead">
                     <h2>Tu pedido</h2>
-                    <button className="x" onClick={() => setCartOpen(false)} aria-label="Cerrar"><Close /></button>
+                    <button type="button" className="more" onClick={() => setCartOpen(false)}>
+                        Agregar más productos
+                    </button>
                 </div>
                 <div className="items">
                     {items.length === 0 ? (
