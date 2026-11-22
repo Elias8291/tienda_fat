@@ -45,6 +45,8 @@ class Product extends Model
             'images' => $this->images->map(fn (ProductImage $image) => [
                 'id' => $image->id,
                 'url' => $image->url,
+                'focus_x' => $image->focus_x,
+                'focus_y' => $image->focus_y,
             ])->values(),
         ];
     }

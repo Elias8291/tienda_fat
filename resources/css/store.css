@@ -156,7 +156,7 @@
   .wear span:nth-child(odd){display:none}
   .panel .sp{left:10%;bottom:16%}
   .photo{display:none}
-  .pic img,.mpics>img{object-fit:contain}
+  .mpics>img{object-fit:contain}
   .card:hover .pic img{transform:none}
   .seal{left:-4px;top:-8px;width:56px;height:56px;font-size:1.25rem}
   .center{margin-top:44px}

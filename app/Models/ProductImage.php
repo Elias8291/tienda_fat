@@ -9,9 +9,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-#[Fillable(['path', 'position'])]
+#[Fillable(['path', 'position', 'focus_x', 'focus_y'])]
 class ProductImage extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'focus_x' => 'integer',
+            'focus_y' => 'integer',
+            'position' => 'integer',
+        ];
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

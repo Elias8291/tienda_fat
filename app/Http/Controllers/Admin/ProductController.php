@@ -69,6 +69,13 @@ class ProductController extends Controller
                 ->get()
                 ->each->delete();
 
+            foreach ($request->input('focus', []) as $focus) {
+                $product->images()->whereKey($focus['id'])->update([
+                    'focus_x' => $focus['x'],
+                    'focus_y' => $focus['y'],
+                ]);
+            }
+
             $this->storeImages($request, $product);
         });
 
@@ -117,10 +124,12 @@ class ProductController extends Controller
     {
         $position = (int) $product->images()->max('position');
 
-        foreach ($request->file('images', []) as $file) {
+        foreach ($request->file('images', []) as $index => $file) {
             $product->images()->create([
                 'path' => $file->store('products', 'public'),
                 'position' => ++$position,
+                'focus_x' => (int) $request->input("new_focus_x.$index", 50),
+                'focus_y' => (int) $request->input("new_focus_y.$index", 50),
             ]);
         }
     }

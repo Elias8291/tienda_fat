@@ -68,7 +68,9 @@ export default function Index({ products, filters, stats }) {
                             <tr key={p.id}>
                                 <td>
                                     <div className="a-prod">
-                                        {p.images[0] ? <img src={p.images[0].url} alt="" /> : <div className="a-noimg" />}
+                                        {p.images[0] ? (
+                                            <img src={p.images[0].url} alt="" style={{ objectPosition: `${p.images[0].focus_x ?? 50}% ${p.images[0].focus_y ?? 50}%` }} />
+                                        ) : <div className="a-noimg" />}
                                         <div>
                                             <b>{p.name}</b>
                                             <small>{p.images.length} {p.images.length === 1 ? 'foto' : 'fotos'}{p.description ? ` · ${p.description}` : ''}</small>

@@ -1,5 +1,5 @@
 import { Link, useForm } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import AdminLayout from '../../../layouts/AdminLayout';
 import { Close, Upload } from '../../../components/Icons';
 import { discount, money } from '../../../lib/money';
@@ -10,6 +10,39 @@ function offer(original, percent) {
     if (!Number.isFinite(base) || base < 0 || !Number.isFinite(pct) || pct < 0 || pct >= 100) return null;
     const price = pct === 0 ? base : Math.round(base * (100 - pct)) / 100;
     return { price, old: pct > 0 && price < base ? base : '', pct: price < base ? pct : 0 };
+}
+
+const clamp = (value) => Math.min(100, Math.max(0, Math.round(value)));
+
+function Crop({ src, x, y, onChange, className, children }) {
+    const drag = useRef(null);
+
+    const place = (clientX, clientY) => {
+        const start = drag.current;
+        if (!start) return;
+        onChange(
+            clamp(start.x - ((clientX - start.px) / start.width) * 100),
+            clamp(start.y - ((clientY - start.py) / start.height) * 100),
+        );
+    };
+
+    return (
+        <div
+            className={className}
+            onPointerDown={(e) => {
+                if (e.target.closest('button')) return;
+                const rect = e.currentTarget.getBoundingClientRect();
+                drag.current = { px: e.clientX, py: e.clientY, x, y, width: rect.width, height: rect.height };
+                e.currentTarget.setPointerCapture(e.pointerId);
+            }}
+            onPointerMove={(e) => place(e.clientX, e.clientY)}
+            onPointerUp={() => { drag.current = null; }}
+            onPointerCancel={() => { drag.current = null; }}
+        >
+            <img src={src} alt="" draggable="false" style={{ objectPosition: `${x}% ${y}%` }} />
+            {children}
+        </div>
+    );
 }
 
 function Field({ label, error, hint, children }) {
@@ -33,6 +66,9 @@ export default function Form({ product }) {
         active: product?.active ?? true,
         images: [],
         remove_images: [],
+        focus: (product?.images ?? []).map((img) => ({ id: img.id, x: img.focus_x ?? 50, y: img.focus_y ?? 50 })),
+        new_focus_x: [],
+        new_focus_y: [],
         ...(editing ? { _method: 'put' } : {}),
     });
 
@@ -57,11 +93,32 @@ export default function Form({ product }) {
     };
 
     const addFiles = (e) => {
-        setData('images', [...data.images, ...Array.from(e.target.files)]);
+        const files = Array.from(e.target.files);
+        setData({
+            ...data,
+            images: [...data.images, ...files],
+            new_focus_x: [...data.new_focus_x, ...files.map(() => 50)],
+            new_focus_y: [...data.new_focus_y, ...files.map(() => 50)],
+        });
         e.target.value = '';
     };
 
-    const dropNew = (index) => setData('images', data.images.filter((_, i) => i !== index));
+    const dropNew = (index) => setData({
+        ...data,
+        images: data.images.filter((_, i) => i !== index),
+        new_focus_x: data.new_focus_x.filter((_, i) => i !== index),
+        new_focus_y: data.new_focus_y.filter((_, i) => i !== index),
+    });
+
+    const moveSaved = (id, x, y) => setData('focus', data.focus.map((item) => (item.id === id ? { ...item, x, y } : item)));
+
+    const moveNew = (index, x, y) => {
+        const nextX = [...data.new_focus_x];
+        const nextY = [...data.new_focus_y];
+        nextX[index] = x;
+        nextY[index] = y;
+        setData({ ...data, new_focus_x: nextX, new_focus_y: nextY });
+    };
 
     const toggleExisting = (id) =>
         setData(
@@ -126,6 +183,7 @@ export default function Form({ product }) {
 
                 <div className="a-card">
                     <h2>Fotos</h2>
+                    <p className="a-crop-note">Arrastra cada foto para recortar lo que se verá en el catálogo. Allí todas salen del mismo tamaño.</p>
                     <label className="a-drop">
                         <Upload />
                         Subir fotos
@@ -140,22 +198,35 @@ export default function Form({ product }) {
                         <div className="a-pics">
                             {product?.images.map((img, i) => {
                                 const gone = data.remove_images.includes(img.id);
+                                const spot = data.focus.find((item) => item.id === img.id) ?? { x: 50, y: 50 };
                                 return (
-                                    <div key={img.id} className={`a-pic ${gone ? 'gone' : ''}`}>
-                                        <img src={img.url} alt="" />
+                                    <Crop
+                                        key={img.id}
+                                        className={`a-pic ${gone ? 'gone' : ''}`}
+                                        src={img.url}
+                                        x={spot.x}
+                                        y={spot.y}
+                                        onChange={(x, y) => !gone && moveSaved(img.id, x, y)}
+                                    >
                                         <button type="button" onClick={() => toggleExisting(img.id)} aria-label={gone ? 'Conservar foto' : 'Quitar foto'}>
                                             {gone ? '↺' : <Close />}
                                         </button>
                                         {gone ? <span className="a-tag">Se quitará</span> : i === 0 && <span className="a-tag">Portada</span>}
-                                    </div>
+                                    </Crop>
                                 );
                             })}
                             {previews.map((url, i) => (
-                                <div key={url} className="a-pic">
-                                    <img src={url} alt="" />
+                                <Crop
+                                    key={url}
+                                    className="a-pic"
+                                    src={url}
+                                    x={data.new_focus_x[i] ?? 50}
+                                    y={data.new_focus_y[i] ?? 50}
+                                    onChange={(x, y) => moveNew(i, x, y)}
+                                >
                                     <button type="button" onClick={() => dropNew(i)} aria-label="Quitar foto"><Close /></button>
                                     <span className="a-tag">Nueva</span>
-                                </div>
+                                </Crop>
                             ))}
                         </div>
                     )}

@@ -26,6 +26,14 @@ class ProductRequest extends FormRequest
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'remove_images' => ['nullable', 'array'],
             'remove_images.*' => ['integer'],
+            'focus' => ['nullable', 'array'],
+            'focus.*.id' => ['integer'],
+            'focus.*.x' => ['integer', 'between:0,100'],
+            'focus.*.y' => ['integer', 'between:0,100'],
+            'new_focus_x' => ['nullable', 'array'],
+            'new_focus_x.*' => ['integer', 'between:0,100'],
+            'new_focus_y' => ['nullable', 'array'],
+            'new_focus_y.*' => ['integer', 'between:0,100'],
         ];
     }
 

@@ -25,7 +25,7 @@ function contactLabel(number) {
     return local.length === 10 ? `${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}` : local;
 }
 
-function Photo({ src, alt, eager = false }) {
+function Photo({ src, alt, eager = false, x = 50, y = 50 }) {
     const [shown, setShown] = useState('');
     const ready = shown === src;
 
@@ -36,6 +36,7 @@ function Photo({ src, alt, eager = false }) {
                 src={src}
                 alt={alt}
                 className={ready ? 'on' : ''}
+                style={{ objectPosition: `${x}% ${y}%` }}
                 loading={eager ? 'eager' : 'lazy'}
                 decoding="async"
                 fetchPriority={eager ? 'high' : 'low'}
@@ -92,7 +93,15 @@ function CardPhoto({ product, onOpen, eager = false }) {
                 }}
                 aria-label={`Ver ${product.name}`}
             >
-                {images[index] && <Photo src={images[index].url} alt={product.name} eager={eager && index === 0} />}
+                {images[index] && (
+                    <Photo
+                        src={images[index].url}
+                        alt={product.name}
+                        eager={eager && index === 0}
+                        x={images[index].focus_x}
+                        y={images[index].focus_y}
+                    />
+                )}
             </button>
             {off > 0 && <span className="tag">−{off}%</span>}
         </div>
@@ -373,7 +382,15 @@ export default function Store({ products, whatsapp }) {
                                 setShot((n) => (n + (dx < 0 ? 1 : -1) + viewing.images.length) % viewing.images.length);
                             }}
                         >
-                            {viewing.images[shot] && <Photo src={viewing.images[shot].url} alt={viewing.name} eager />}
+                            {viewing.images[shot] && (
+                                <Photo
+                                    src={viewing.images[shot].url}
+                                    alt={viewing.name}
+                                    eager
+                                    x={viewing.images[shot].focus_x}
+                                    y={viewing.images[shot].focus_y}
+                                />
+                            )}
                             {discount(viewing) > 0 && <span className="tag">−{discount(viewing)}%</span>}
                             {viewing.images.length > 1 && (
                                 <button

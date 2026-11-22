@@ -106,6 +106,29 @@ class AdminCatalogTest extends TestCase
         }
     }
 
+    public function test_the_catalog_keeps_the_chosen_crop(): void
+    {
+        $product = $this->product(['name' => 'Crop', 'active' => true]);
+        $image = $product->images()->create(['path' => 'https://example.com/a.jpg', 'focus_x' => 50, 'focus_y' => 50]);
+
+        $this->actingAs(User::factory()->create())
+            ->post("/admin/productos/{$product->id}", [
+                '_method' => 'put',
+                'name' => 'Crop',
+                'price' => '20',
+                'active' => '1',
+                'focus' => [['id' => $image->id, 'x' => 15, 'y' => 80]],
+            ])
+            ->assertRedirect('/admin/productos');
+
+        $this->assertSame(15, $image->refresh()->focus_x);
+        $this->assertSame(80, $image->focus_y);
+
+        $this->get('/')->assertInertia(fn (Assert $page) => $page
+            ->where('products.0.images.0.focus_x', 15)
+            ->where('products.0.images.0.focus_y', 80));
+    }
+
     public function test_a_new_product_needs_a_photo_and_a_valid_old_price(): void
     {
         $this->actingAs(User::factory()->create())
