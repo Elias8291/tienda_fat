@@ -151,6 +151,7 @@ export default function Store({ products, whatsapp }) {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [error, setError] = useState('');
+    const [receipt, setReceipt] = useState('');
     const [confirming, setConfirming] = useState(false);
     const shotX = useRef(0);
     const drawerRef = useRef(null);
@@ -240,17 +241,38 @@ export default function Store({ products, whatsapp }) {
             setError('Escribe tu número de teléfono (10 dígitos) para continuar.');
             return;
         }
+        const now = new Date();
+        const stamp = [
+            String(now.getFullYear()).slice(2),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0'),
+        ].join('');
+        setReceipt(`R-${stamp}-${String(1000 + Math.floor(Math.random() * 9000))}`);
         setError('');
         setConfirming(true);
     };
 
+    const receiptText = () => {
+        const lines = items.map((p) => `• ${p.code}  ${p.name}  ${money(p.price)}`);
+
+        return [
+            'Fati Nails',
+            `Recibo ${receipt}`,
+            '',
+            `Cliente: ${name.trim()}`,
+            `Teléfono: ${phone.trim()}`,
+            '',
+            ...lines,
+            '',
+            `Total: ${money(total)}`,
+            '',
+            'Este mensaje no confirma el pedido. Lo revisamos aquí y te contactamos para la entrega y el pago.',
+        ].join('\n');
+    };
+
     const openWhatsApp = () => {
+        const msg = receiptText();
         setConfirming(false);
-        const lines = items.map((p) => `• ${p.name} — ${money(p.price)}`);
-        const msg =
-            `Hola, soy ${name.trim()}. Me gustaría pedir:\n\n${lines.join('\n')}\n\nTotal: ${money(total)}` +
-            `\n\nMi teléfono: ${phone.trim()}` +
-            '\n\n¿Me confirmas disponibilidad? ¡Gracias!';
         window.open(`https://wa.me/${line}?text=${encodeURIComponent(msg)}`, '_blank');
     };
 
@@ -321,6 +343,7 @@ export default function Store({ products, whatsapp }) {
                             <article className="card" key={p.id}>
                                 <CardPhoto product={p} eager={i < 4} onOpen={() => openProduct(p)} />
                                 <h3 onClick={() => openProduct(p)}>{p.name}</h3>
+                                <span className="sku">{p.code}</span>
                                 <Price product={p} />
                                 <button className={`add ${inCart(p.id) ? 'in' : ''}`} onClick={() => toggleItem(p.id)}>
                                     {inCart(p.id) ? 'En el pedido' : 'Añadir al pedido'}
@@ -378,6 +401,7 @@ export default function Store({ products, whatsapp }) {
                                 <img src={sized(cover(p), 240)} alt={p.name} />
                                 <div>
                                     <h4>{p.name}</h4>
+                                    <span className="sku">{p.code}</span>
                                     <div className="pr">{money(p.price)}</div>
                                 </div>
                                 <button className="del" onClick={() => toggleItem(p.id)} aria-label="Quitar"><Trash /></button>
@@ -440,6 +464,7 @@ export default function Store({ products, whatsapp }) {
                             )}
                         </div>
                         <div className="mbody">
+                            <span className="sku">{viewing.code}</span>
                             <h3>{viewing.name}</h3>
                             <Price product={viewing} />
                             {viewing.description && <p>{viewing.description}</p>}
@@ -467,7 +492,17 @@ export default function Store({ products, whatsapp }) {
                             Se abrirá WhatsApp con tu pedido ya escrito, <b>solo presiona enviar</b>. Ahí lo revisamos
                             y nos pondremos en contacto contigo para coordinar la entrega y el pago.
                         </p>
-                        <div className="sub"><span>Total</span><span>{money(total)}</span></div>
+                        <div className="receipt" aria-label={`Recibo ${receipt}`}>
+                            <b>Recibo {receipt}</b>
+                            {items.map((p) => (
+                                <div key={p.id}>
+                                    <span className="sku">{p.code}</span>
+                                    <span>{p.name}</span>
+                                    <span>{money(p.price)}</span>
+                                </div>
+                            ))}
+                            <div className="total"><span>Total</span><span>{money(total)}</span></div>
+                        </div>
                         <button className="cta" onClick={openWhatsApp}>
                             <WhatsApp /> Ir a WhatsApp
                         </button>

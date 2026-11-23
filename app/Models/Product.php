@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'description', 'price', 'old_price', 'active', 'position'])]
+#[Fillable(['name', 'code', 'description', 'price', 'old_price', 'active', 'position'])]
 class Product extends Model
 {
     protected function casts(): array
@@ -18,6 +18,29 @@ class Product extends Model
             'active' => 'boolean',
             'position' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Product $product) {
+            if (filled($product->code)) {
+                $product->code = strtoupper(trim($product->code));
+            }
+        });
+
+        static::created(function (Product $product) {
+            if (filled($product->code)) {
+                return;
+            }
+
+            $code = sprintf('FN-%04d', $product->id);
+
+            if (static::query()->where('code', $code)->exists()) {
+                $code = sprintf('FN-%d', $product->id);
+            }
+
+            $product->forceFill(['code' => $code])->saveQuietly();
+        });
     }
 
     public function images(): HasMany
@@ -37,6 +60,7 @@ class Product extends Model
     {
         return [
             'id' => $this->id,
+            'code' => $this->code,
             'name' => $this->name,
             'description' => $this->description,
             'price' => $this->price,

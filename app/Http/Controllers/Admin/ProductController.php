@@ -19,7 +19,10 @@ class ProductController extends Controller
         $search = trim((string) $request->query('q', ''));
 
         $products = Product::with('images')
-            ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
+            ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            }))
             ->orderBy('position')
             ->orderBy('id')
             ->get()
@@ -44,7 +47,7 @@ class ProductController extends Controller
     {
         DB::transaction(function () use ($request) {
             $product = Product::create([
-                ...$request->safe()->except(['images', 'remove_images']),
+                ...$this->productAttributes($request),
                 'position' => ((int) Product::min('position')) - 1,
             ]);
             $this->storeImages($request, $product);
@@ -63,7 +66,7 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product): RedirectResponse
     {
         DB::transaction(function () use ($request, $product) {
-            $product->update($request->safe()->except(['images', 'remove_images']));
+            $product->update($this->productAttributes($request));
 
             $product->images()
                 ->whereIn('id', $request->input('remove_images', []))
@@ -119,6 +122,20 @@ class ProductController extends Controller
         });
 
         return redirect()->route('admin.products.index')->with('success', 'Producto eliminado.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function productAttributes(ProductRequest $request): array
+    {
+        $attributes = $request->safe()->except(['images', 'remove_images']);
+
+        if (blank($attributes['code'] ?? null)) {
+            unset($attributes['code']);
+        }
+
+        return $attributes;
     }
 
     private function storeImages(ProductRequest $request, Product $product): void

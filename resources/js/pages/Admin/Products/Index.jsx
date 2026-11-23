@@ -45,13 +45,13 @@ export default function Index({ products, filters, stats }) {
                 </div>
                 <div className="a-search">
                     <Search />
-                    <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre" aria-label="Buscar por nombre" />
+                    <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre o código" aria-label="Buscar por nombre o código" />
                 </div>
             </div>
 
             {products.length === 0 ? (
                 <div className="a-empty">
-                    {filters.q ? 'No hay productos con ese nombre.' : 'Aún no hay productos. Crea el primero con «Nuevo producto».'}
+                    {filters.q ? 'No hay productos con ese nombre o código.' : 'Aún no hay productos. Crea el primero con «Nuevo producto».'}
                 </div>
             ) : (
                 <table className="a-table">
@@ -73,7 +73,7 @@ export default function Index({ products, filters, stats }) {
                                         ) : <div className="a-noimg" />}
                                         <div>
                                             <b>{p.name}</b>
-                                            <small>{p.images.length} {p.images.length === 1 ? 'foto' : 'fotos'}{p.description ? ` · ${p.description}` : ''}</small>
+                                            <small>{p.code} · {p.images.length} {p.images.length === 1 ? 'foto' : 'fotos'}{p.description ? ` · ${p.description}` : ''}</small>
                                         </div>
                                     </div>
                                 </td>

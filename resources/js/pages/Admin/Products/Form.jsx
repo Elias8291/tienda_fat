@@ -60,6 +60,7 @@ export default function Form({ product }) {
     const editing = Boolean(product);
     const { data, setData, post, processing, errors } = useForm({
         name: product?.name ?? '',
+        code: product?.code ?? '',
         description: product?.description ?? '',
         price: product?.price ?? '',
         old_price: product?.old_price ?? '',
@@ -141,6 +142,17 @@ export default function Form({ product }) {
                     <h2>Información</h2>
                     <Field label="Nombre" error={errors.name}>
                         <input type="text" value={data.name} onChange={(e) => setData('name', e.target.value)} maxLength={120} required />
+                    </Field>
+                    <Field label="Código" error={errors.code} hint="Si lo dejas vacío, se crea solo. Sirve para reconocer la prenda en el recibo.">
+                        <input
+                            type="text"
+                            value={data.code}
+                            onChange={(e) => setData('code', e.target.value.toUpperCase())}
+                            maxLength={20}
+                            autoCapitalize="characters"
+                            spellCheck="false"
+                            placeholder="FN-0001"
+                        />
                     </Field>
                     <Field label="Descripción" error={errors.description} hint="Opcional. Se muestra al abrir el producto.">
                         <textarea value={data.description} onChange={(e) => setData('description', e.target.value)} maxLength={1000} />

@@ -83,6 +83,7 @@ class AdminCatalogTest extends TestCase
 
         $product = Product::with('images')->sole();
         $this->assertSame('Set rosa', $product->name);
+        $this->assertSame(sprintf('FN-%04d', $product->id), $product->code);
         $this->assertCount(2, $product->images);
         Storage::disk('public')->assertExists($product->images[0]->path);
         $this->assertMatchesRegularExpression('#^/storage/products/.+\.(webp|jpe?g|png)$#', $product->images[0]->url);
@@ -90,6 +91,7 @@ class AdminCatalogTest extends TestCase
         $this->assertLessThanOrEqual(960, max($width, $height));
 
         $this->get('/')->assertInertia(fn (Assert $page) => $page
+            ->where('products.0.code', $product->code)
             ->where('products.0.images.0.url', $product->images[0]->url));
     }
 
@@ -212,5 +214,30 @@ class AdminCatalogTest extends TestCase
 
         $this->assertModelMissing($product);
         Storage::disk('public')->assertMissing($image->path);
+    }
+
+    public function test_staff_can_choose_a_product_code(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs(User::factory()->create())
+            ->post('/admin/productos', [
+                'name' => 'Set rosa',
+                'code' => 'rosa-7',
+                'price' => '25',
+                'active' => '1',
+                'images' => [UploadedFile::fake()->image('a.jpg')],
+            ])
+            ->assertRedirect('/admin/productos');
+
+        $this->assertSame('ROSA-7', Product::sole()->code);
+
+        $this->post('/admin/productos', [
+            'name' => 'Otro',
+            'code' => 'rosa-7',
+            'price' => '10',
+            'active' => '1',
+            'images' => [UploadedFile::fake()->image('b.jpg')],
+        ])->assertSessionHasErrors('code');
     }
 }

@@ -1,17 +1,17 @@
 {
-  "_AdminLayout-DqtDUyOT.js": {
-    "file": "assets/AdminLayout-DqtDUyOT.js",
+  "_AdminLayout-DzJwcbEt.js": {
+    "file": "assets/AdminLayout-DzJwcbEt.js",
     "name": "AdminLayout",
     "imports": [
       "resources/js/app.jsx",
-      "_Icons-Bl6bd7z5.js"
+      "_Icons-sodrh-9m.js"
     ],
     "css": [
       "assets/admin-CD0g0eA3.css"
     ]
   },
-  "_Icons-Bl6bd7z5.js": {
-    "file": "assets/Icons-Bl6bd7z5.js",
+  "_Icons-sodrh-9m.js": {
+    "file": "assets/Icons-sodrh-9m.js",
     "name": "Icons",
     "imports": [
       "resources/js/app.jsx"
@@ -26,7 +26,7 @@
     "name": "money"
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-D40UyksT.js",
+    "file": "assets/app-CP8N1c2I.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -42,65 +42,65 @@
     ]
   },
   "resources/js/pages/Admin/Login.jsx": {
-    "file": "assets/Login-DPXkA52k.js",
+    "file": "assets/Login-DEj6AgFW.js",
     "name": "Login",
     "src": "resources/js/pages/Admin/Login.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Icons-Bl6bd7z5.js"
+      "_Icons-sodrh-9m.js"
     ],
     "css": [
       "assets/admin-CD0g0eA3.css"
     ]
   },
   "resources/js/pages/Admin/Products/Form.jsx": {
-    "file": "assets/Form-BMc97j4Q.js",
+    "file": "assets/Form-ChOvzsB6.js",
     "name": "Form",
     "src": "resources/js/pages/Admin/Products/Form.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DqtDUyOT.js",
-      "_Icons-Bl6bd7z5.js",
+      "_AdminLayout-DzJwcbEt.js",
+      "_Icons-sodrh-9m.js",
       "_money-Dyt2RYoW.js"
     ]
   },
   "resources/js/pages/Admin/Products/Index.jsx": {
-    "file": "assets/Index-B7OLCzgS.js",
+    "file": "assets/Index-Dn7diGjd.js",
     "name": "Index",
     "src": "resources/js/pages/Admin/Products/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DqtDUyOT.js",
-      "_Icons-Bl6bd7z5.js",
+      "_AdminLayout-DzJwcbEt.js",
+      "_Icons-sodrh-9m.js",
       "_money-Dyt2RYoW.js"
     ]
   },
   "resources/js/pages/Admin/Users/Index.jsx": {
-    "file": "assets/Index-C35HxoV4.js",
+    "file": "assets/Index-VNgRWF4R.js",
     "name": "Index",
     "src": "resources/js/pages/Admin/Users/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DqtDUyOT.js",
-      "_Icons-Bl6bd7z5.js"
+      "_AdminLayout-DzJwcbEt.js",
+      "_Icons-sodrh-9m.js"
     ]
   },
   "resources/js/pages/Store.jsx": {
-    "file": "assets/Store-DoufWQ9e.js",
+    "file": "assets/Store-CjYzPu5f.js",
     "name": "Store",
     "src": "resources/js/pages/Store.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Icons-Bl6bd7z5.js",
+      "_Icons-sodrh-9m.js",
       "_money-Dyt2RYoW.js"
     ],
     "css": [
-      "assets/Store-BPVL8ZNo.css"
+      "assets/Store-bVDS1rjc.css"
     ]
   }
 }
